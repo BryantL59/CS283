@@ -36,6 +36,12 @@ Please provide answers to these questions using markdown notation and place them
 
 3. Please provide a link to the repository you are using for this class.
 
+    https://github.com/BryantL59/CS283
+
 4. Briefly describe what you want to get out of this class.
 
+    I want to be able to understand how low level interfaces such as the kernal interact with the CPU, GPU, RAM etc... to bring interfaces usable by normal users. 
+
 5. Briefly describe any concerns you might be having with being successful in this class (if any).
+
+    No concerns. 
