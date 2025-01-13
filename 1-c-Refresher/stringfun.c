@@ -31,9 +31,7 @@ int setup_buff(char *buff, char *user_str, int len) {
             if (!whitespace) {
                 buff[user_len++] = ' ';
                 whitespace = 1;
-            } else {
-                // Continue skipping spaces
-            }
+            } 
         } else {
             buff[user_len++] = *user_str;
             whitespace = 0;
@@ -151,7 +149,7 @@ int main(int argc, char *argv[]) {
                 buff[i] = buff[user_str_len - i - 1];
                 buff[user_str_len - i - 1] = temp;
             }
-            printf("Reversed Buffer: ");
+            
             print_buff(buff, BUFFER_SZ);
             break;
 
