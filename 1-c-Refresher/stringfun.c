@@ -193,4 +193,4 @@ int main(int argc, char *argv[]) {
 //          do you think providing both the pointer and the length
 //          is a good practice, after all we know from main() th
 
-//something
+//something2
