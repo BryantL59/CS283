@@ -56,10 +56,13 @@ void usage(char *exename) {
 }
 
 int count_words(char *buff, int len, int str_len) {
+
     int count = 0;
     int in_word = 0;
 
-    for (int i = 0; i < str_len; i++) {
+    int limit = len < str_len ? len : str_len;
+
+    for (int i = 0; i < limit; i++) {
         if (buff[i] == ' ') {
             if (in_word) {
                 count++;
@@ -88,9 +91,9 @@ int main(int argc, char *argv[]) {
     int  user_str_len;      //length of user supplied string
 
     //TODO:  #1. WHY IS THIS SAFE, aka what if argv[1] does not exist?
-    //      PLACE A COMMENT BLOCK HERE EXPLAINING
+    // PLACE A COMMENT BLOCK HERE EXPLAINING
     // This is safe because we check if argc is less than 2 or if argv[1] doesn't start with '-', 
-    // in which case we print usage and exit. This ensures that we have a valid option to process.
+    // in which case, the programs exit with error code 1. 
     if ((argc < 2) || (*argv[1] != '-')) {
         usage(argv[0]);
         exit(1);
@@ -107,9 +110,8 @@ int main(int argc, char *argv[]) {
     //WE NOW WILL HANDLE THE REQUIRED OPERATIONS
 
     //TODO:  #2 Document the purpose of the if statement below
-    //      PLACE A COMMENT BLOCK HERE EXPLAINING
+    // PLACE A COMMENT BLOCK HERE EXPLAINING
     // The if statement checks if there are less than 3 arguments, which means no string to process.
-    // This ensures that the user provides the required string after the option.
     if (argc < 3) {
         usage(argv[0]);
         exit(1);
@@ -149,7 +151,7 @@ int main(int argc, char *argv[]) {
                 buff[i] = buff[user_str_len - i - 1];
                 buff[user_str_len - i - 1] = temp;
             }
-            
+
             print_buff(buff, BUFFER_SZ);
             break;
 
@@ -186,9 +188,9 @@ int main(int argc, char *argv[]) {
     exit(0);
 }
 
-//TODO:  #7  Notice all of the helper functions provided in the 
-//          starter take both the buffer as well as the length.  Why
-//          do you think providing both the pointer and the length
-//          is a good practice, after all we know from main() th
+// TODO:  #7  Notice all of the helper functions provided in the 
+// starter take both the buffer as well as the length.  Why
+// do you think providing both the pointer and the length
+// is a good practice, after all we know from main() th
 
 //something2
