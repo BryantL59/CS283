@@ -14,39 +14,45 @@ int  count_words(char *, int, int);
 //add additional prototypes here
 
 int setup_buff(char *buff, char *user_str, int len) {
-    //TODO: #4:  Implement the setup buff as per the directions
     if (!buff || !user_str) {
         return -2;
     }
 
     int string_len = 0;
+    int last_char;
 
-    while (*user_str != '\0' && string_len < len - 1) {
+    while (*user_str != '\0' && string_len < len) { 
         if (*user_str != ' ' || (string_len > 0 && *(buff + string_len - 1) != ' ')) {
             *(buff + string_len) = *user_str;
             string_len++;
+            last_char = (*user_str == ' ');
         }
         user_str++;
     }
 
+    if (last_char) {
+        string_len--;
+    }
 
-
-    for (int i = string_len; i < len - 1; i++) {
+    for (int i = string_len; i < len; i++) {
         *(buff + i) = '.';
     }
 
-     if (*user_str != '\0') {  
+    if (*user_str != '\0') {
         return -1;
     }
-    
+
     return string_len;
 }
 
+
+
 void print_buff(char *buff, int len) {
-    printf("Buffer:  ");
+    printf("Buffer:  [");
     for (int i = 0; i < len; i++) {
         putchar(*(buff + i));
     }
+    printf("]");
     putchar('\n');
 }
 
@@ -57,10 +63,15 @@ void usage(char *exename) {
 int count_words(char *buff, int len, int str_len) {
     int count = 0;
     int limit = len < str_len ? len : str_len;
+    int in_word = 0;
+    char *p = buff;
 
-    for (int i = 0; i < limit; i++) {
-        if (*(buff + i) != ' ' && (i == 0 || *(buff -1) == ' ')) {
+    for (int i = 0; i < limit; i++, p++) {
+        if (*p != ' ' && !in_word) {
             count++;
+            in_word = 1;
+        } else if (*p == ' ') {
+            in_word = 0;
         }
     }
 
@@ -95,6 +106,7 @@ void print_word(char *buff, int len) {
     }
 
     printf("%d. %.*s (%d)\n", count, word_length, buff + len - word_length, word_length);
+    
 }
 
 
@@ -148,6 +160,7 @@ int main(int argc, char *argv[]) {
         exit(99);
     }
 
+
     user_str_len = setup_buff(buff, input_string, BUFFER_SZ);     //see todos
     if (user_str_len < 0) {
         printf("Error setting up buffer, error = %d", user_str_len);
@@ -169,7 +182,16 @@ int main(int argc, char *argv[]) {
             break;
 
         case 'w':
+            rc = count_words(buff, BUFFER_SZ, user_str_len);
+
+            if (rc < 0) {
+                printf("Error counting words, rc = %d", rc);
+                exit(2);
+            }
+            printf("Word Print\n");
+            printf("----------\n");
             print_word(buff, user_str_len);
+            printf("\nNumber of words returned: %d\n", rc);
             break;
 
         //TODO:  #5 Implement the other cases for 'r' and 'w' by extending
@@ -192,4 +214,4 @@ int main(int argc, char *argv[]) {
 //          the buff variable will have exactly 50 bytes?
 //  
 //          This is to ensure safe code execution, for example you can check if the length of the buff matches the length
-//          of the actual string or if it doesn't.
+//          of the actual string or if the length of the string exeed the length of the buffer.
