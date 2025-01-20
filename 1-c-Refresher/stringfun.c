@@ -99,13 +99,14 @@ void print_word(char *buff, int len) {
         if (*(buff + i) != ' ' && *(buff + i) >= 32 && *(buff + i) <= 126) {
             word_length++; 
         } else {
-                printf("%d. %.*s (%d)\n", count, word_length, buff + i - word_length, word_length);
+                printf("%d. %.*s(%d)\n", count, word_length, buff + i - word_length, word_length);
                 word_length = 0; 
                 count++;
         }
     }
 
-    printf("%d. %.*s (%d)\n", count, word_length, buff + len - word_length, word_length);
+        printf("%d. %.*s(%d)\n", count, word_length, buff + len - word_length, word_length);
+
     
 }
 
@@ -192,6 +193,10 @@ int main(int argc, char *argv[]) {
             printf("----------\n");
             print_word(buff, user_str_len);
             printf("\nNumber of words returned: %d\n", rc);
+            break;
+
+        case 'x':
+            printf("Not Implemented!\n");
             break;
 
         //TODO:  #5 Implement the other cases for 'r' and 'w' by extending
