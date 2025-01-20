@@ -19,18 +19,20 @@ int setup_buff(char *buff, char *user_str, int len) {
     }
 
     int string_len = 0;
-    int last_char;
+
+    while (*user_str == ' ') {
+        user_str++;
+    }
 
     while (*user_str != '\0' && string_len < len) { 
-        if (*user_str != ' ' || (string_len > 0 && *(buff + string_len - 1) != ' ')) {
+        if (*user_str != ' ' ||  *(buff + string_len - 1) != ' ') {
             *(buff + string_len) = *user_str;
             string_len++;
-            last_char = (*user_str == ' ');
         }
         user_str++;
     }
 
-    if (last_char) {
+    if (*(buff + string_len - 1) == ' ') {
         string_len--;
     }
 
@@ -62,11 +64,10 @@ void usage(char *exename) {
 
 int count_words(char *buff, int len, int str_len) {
     int count = 0;
-    int limit = len < str_len ? len : str_len;
     int in_word = 0;
     char *p = buff;
 
-    for (int i = 0; i < limit; i++, p++) {
+    for (int i = 0; i < str_len && i < len; i++, p++) {
         if (*p != ' ' && !in_word) {
             count++;
             in_word = 1;
