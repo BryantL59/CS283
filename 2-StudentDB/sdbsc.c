@@ -156,11 +156,10 @@ int add_student(int fd, int id, char *fname, char *lname, int gpa)
  */
 int del_student(int fd, int id)
 {
-    if (id < MIN_STD_ID || id > MAX_STD_ID)
-        return ERR_DB_OP;
 
     student_t student;
     off_t offset = id * STUDENT_RECORD_SIZE;
+
     int rc = get_student(fd, id, &student);
     if (rc != NO_ERROR) {
         printf(M_STD_NOT_FND_MSG, id);
@@ -209,12 +208,10 @@ int count_db_records(int fd)
 {
     student_t student;
     int count = 0;
-    off_t offset = 0;
     while (read(fd, &student, STUDENT_RECORD_SIZE) == STUDENT_RECORD_SIZE)
     {
         if (memcmp(&student, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0)
             count++;
-        offset += STUDENT_RECORD_SIZE;
     }
     printf(M_DB_RECORD_CNT, count);
     return count;
@@ -257,7 +254,6 @@ int print_db(int fd)
 {
     student_t student;
     int count = 0;
-    off_t offset = 0;
 
     while (read(fd, &student, STUDENT_RECORD_SIZE) == STUDENT_RECORD_SIZE)
     {
