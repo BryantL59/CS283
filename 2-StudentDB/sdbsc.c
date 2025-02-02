@@ -62,16 +62,19 @@ int open_db(char *dbFile, bool should_truncate)
  */
 int get_student(int fd, int id, student_t *s)
 {
+    off_t offset = id * STUDENT_RECORD_SIZE;
     if (id < MIN_STD_ID || id > MAX_STD_ID)
         return ERR_DB_OP;
-
-    off_t offset = id * STUDENT_RECORD_SIZE;
 
     if (lseek(fd, offset, SEEK_SET) == -1)
         return ERR_DB_FILE;
 
-    if (read(fd, s, STUDENT_RECORD_SIZE) <= 0 || memcmp(s, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) == 0)
+    if (read(fd, s, STUDENT_RECORD_SIZE) <= 0)
         return SRCH_NOT_FOUND;
+
+    if (s == NULL || s->id == 0) {
+        return SRCH_NOT_FOUND;
+    }
 
     return NO_ERROR;
 }
@@ -104,25 +107,28 @@ int get_student(int fd, int id, student_t *s)
  */
 int add_student(int fd, int id, char *fname, char *lname, int gpa)
 {
-    student_t new_student = {id, "", "", gpa};
-    strncpy(new_student.fname, fname, sizeof(new_student.fname) - 1);
-    strncpy(new_student.lname, lname, sizeof(new_student.lname) - 1);
-
+    student_t new_student = {0};
     off_t offset = id * STUDENT_RECORD_SIZE;
 
     if (lseek(fd, offset, SEEK_SET) == -1) {
         return ERR_DB_FILE;
     }
-
     student_t existing_student;
 
     if (read(fd, &existing_student, STUDENT_RECORD_SIZE) > 0) {
         printf(M_ERR_DB_ADD_DUP, id);
         return ERR_DB_OP;  
+
+    } else {
+        new_student.id = id;
+        strcpy(new_student.fname, fname);
+        strcpy(new_student.lname, lname);
+        new_student.gpa = gpa;
+
+        if (write(fd, &new_student, STUDENT_RECORD_SIZE) != STUDENT_RECORD_SIZE){ 
+        return ERR_DB_FILE;
     }
 
-    if (write(fd, &new_student, STUDENT_RECORD_SIZE) != STUDENT_RECORD_SIZE){ 
-        return ERR_DB_FILE;
     }
 
     printf(M_STD_ADDED, new_student.id);
@@ -160,8 +166,8 @@ int del_student(int fd, int id)
     student_t student;
     off_t offset = id * STUDENT_RECORD_SIZE;
 
-    int rc = get_student(fd, id, &student);
-    if (rc != NO_ERROR) {
+    int existing_student = get_student(fd, id, &student);
+    if (existing_student != NO_ERROR) {
         printf(M_STD_NOT_FND_MSG, id);
         return ERR_DB_OP;
     }
@@ -315,11 +321,10 @@ int print_db(int fd)
  */
 void print_student(student_t *s)
 {
-    if (s == NULL || s->id == 0) {
+    if (s==NULL || s->id==0){
         printf(M_ERR_STD_PRINT);
-        return;
     }
-
+    
     float calculated_gpa = s->gpa / 100.0;
 
     printf(STUDENT_PRINT_HDR_STRING, "ID", "FIRST NAME", "LAST_NAME", "GPA");
