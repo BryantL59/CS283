@@ -63,8 +63,6 @@ int open_db(char *dbFile, bool should_truncate)
 int get_student(int fd, int id, student_t *s)
 {
     off_t offset = id * STUDENT_RECORD_SIZE;
-    if (id < MIN_STD_ID || id > MAX_STD_ID)
-        return ERR_DB_OP;
 
     if (lseek(fd, offset, SEEK_SET) == -1)
         return ERR_DB_FILE;
@@ -115,12 +113,12 @@ int add_student(int fd, int id, char *fname, char *lname, int gpa)
     }
     student_t existing_student;
 
-    if (read(fd, &existing_student, STUDENT_RECORD_SIZE) > 0) {
+    if (read(fd, &existing_student, STUDENT_RECORD_SIZE) > 0) { //if theres a duplicate student
         printf(M_ERR_DB_ADD_DUP, id);
         return ERR_DB_OP;  
 
-    } else {
-        new_student.id = id;
+    } else { //copies the new students data into database
+        new_student.id = id; 
         strcpy(new_student.fname, fname);
         strcpy(new_student.lname, lname);
         new_student.gpa = gpa;
@@ -166,13 +164,13 @@ int del_student(int fd, int id)
     student_t student;
     off_t offset = id * STUDENT_RECORD_SIZE;
 
-    int existing_student = get_student(fd, id, &student);
+    int existing_student = get_student(fd, id, &student); //uses the get_student function to check if the students exists
     if (existing_student != NO_ERROR) {
         printf(M_STD_NOT_FND_MSG, id);
         return ERR_DB_OP;
     }
 
-    if (lseek(fd, offset, SEEK_SET) == -1) {
+    if (lseek(fd, offset, SEEK_SET) == -1) { //if the entry doesn't exist at the offset
         return ERR_DB_FILE;
     }
 
@@ -213,10 +211,10 @@ int del_student(int fd, int id)
 int count_db_records(int fd)
 {
     student_t student;
-    int count = 0;
+    int count = 0; 
     while (read(fd, &student, STUDENT_RECORD_SIZE) == STUDENT_RECORD_SIZE)
     {
-        if (memcmp(&student, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0)
+        if (memcmp(&student, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0) //if not empty add 1 to count
             count++;
     }
     printf(M_DB_RECORD_CNT, count);
@@ -270,7 +268,7 @@ int print_db(int fd)
         }
     }
 
-    if (count == 0)
+    if (count == 0) //if there are no entries, print no entries.
     {
         printf(M_DB_EMPTY);
         return NO_ERROR;
@@ -281,7 +279,7 @@ int print_db(int fd)
     lseek(fd, 0, SEEK_SET);
     while (read(fd, &student, STUDENT_RECORD_SIZE) == STUDENT_RECORD_SIZE)
     {
-        if (memcmp(&student, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0)
+        if (memcmp(&student, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0) //checks the entry is not empty
         {
             float real_gpa = student.gpa / 100.0;
             printf(STUDENT_PRINT_FMT_STRING, student.id, student.fname, student.lname, real_gpa);
@@ -382,10 +380,53 @@ void print_student(student_t *s)
  */
 int compress_db(int fd)
 {
-    // TODO
-    printf(M_NOT_IMPL);
-    return fd;
+    student_t student;
+    int new_fd = open_db(TMP_DB_FILE, true); //Opens the temp DB file with truncation using the open_db function
+
+    if (new_fd == -1) //if opening the file fails
+    {
+        printf(M_ERR_DB_OPEN);
+        return ERR_DB_FILE;
+    }
+
+    if (lseek(fd, 0, SEEK_SET) == -1) //sets the offset to the beginning of the file and checks for any errors
+    {
+        printf(M_ERR_DB_READ);
+        close(new_fd);
+        return ERR_DB_FILE;
+    }
+
+    //copies all valid entries into the new file
+    while (read(fd, &student, STUDENT_RECORD_SIZE) == STUDENT_RECORD_SIZE)
+    {
+        if (memcmp(&student, &EMPTY_STUDENT_RECORD, STUDENT_RECORD_SIZE) != 0)
+        {
+            if (write(new_fd, &student, STUDENT_RECORD_SIZE) == -1)
+            {
+                printf(M_ERR_DB_WRITE);
+                close(new_fd);
+                return ERR_DB_FILE;
+            }
+        }
+    }
+
+    close(fd);
+    close(new_fd);
+
+
+    //replaces old database file with new one
+    if (rename(TMP_DB_FILE, DB_FILE) == -1)
+    {
+        printf(M_ERR_DB_CREATE);
+        return ERR_DB_FILE;
+    }
+
+    //returns new DB file
+    printf(M_DB_COMPRESSED_OK);
+    return new_fd;
 }
+
+
 
 /*
  *  validate_range
