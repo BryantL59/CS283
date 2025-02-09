@@ -4,6 +4,8 @@
 
 #include "dshlib.h"
 
+#define dragon "dragon"
+
 /*
  * Implement your main function by building a loop that prompts the
  * user for input.  Use the SH_PROMPT constant from dshlib.h and then
@@ -46,10 +48,6 @@
  */
 int main() {
     char *cmd_buff = malloc(SH_CMD_MAX * sizeof(char));
-    if (!cmd_buff) {
-        fprintf(stderr, "Memory allocation failed\n");
-        return EXIT_FAILURE;
-    }
 
     int rc = 0;
     command_list_t clist;
@@ -70,7 +68,26 @@ int main() {
         }
 
         if (strcmp(cmd_buff, EXIT_CMD) == 0) {
+            free(cmd_buff);
             exit(OK);
+        }
+
+        if (strcmp(cmd_buff, dragon) == 0) {
+            printf("\n");
+            FILE *file = fopen(dragon, "r");
+            if (file == NULL) {
+                printf("error");
+                continue;
+            }
+
+
+            char line[1024];
+            while (fgets(line, sizeof(line), file)) {
+                printf("%s", line);
+            }
+
+            fclose(file);
+            continue;
         }
 
         rc = build_cmd_list(cmd_buff, &clist);
@@ -102,5 +119,5 @@ int main() {
     }
 
     free(cmd_buff);
-    return EXIT_SUCCESS;
+    return OK;
 }
