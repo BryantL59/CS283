@@ -67,49 +67,50 @@ int main() {
             continue;
         }
 
-        if (strcmp(cmd_buff, EXIT_CMD) == 0) {
+        if (strcmp(cmd_buff, EXIT_CMD) == 0) { //exit command
             free(cmd_buff);
             exit(OK);
         }
 
-        if (strcmp(cmd_buff, dragon) == 0) {
+        if (strcmp(cmd_buff, dragon) == 0) { //dragon command
             printf("\n");
-            FILE *file = fopen(dragon, "r");
+            FILE *file = fopen(dragon, "r"); //open file with read permission
             if (file == NULL) {
                 printf("error");
                 continue;
             }
 
 
-            char line[1024];
-            while (fgets(line, sizeof(line), file)) {
-                printf("%s", line);
+            char contents[1024];
+            while (fgets(contents, sizeof(contents), file)) { //uses fgets to print out contents
+                printf("%s", contents);
+                printf("\n");
             }
 
             fclose(file);
             continue;
         }
 
-        rc = build_cmd_list(cmd_buff, &clist);
+        rc = build_cmd_list(cmd_buff, &clist); 
 
-        if (rc == WARN_NO_CMDS) {
+        if (rc == WARN_NO_CMDS) { //checks if the user inputed a command
             printf(CMD_WARN_NO_CMD);
             continue;
         }
 
-        if (rc == ERR_TOO_MANY_COMMANDS) {
+        if (rc == ERR_TOO_MANY_COMMANDS) { //over command cout
             printf(CMD_ERR_PIPE_LIMIT, CMD_MAX);
             continue;
         }
 
-        if (rc == ERR_CMD_OR_ARGS_TOO_BIG) {
+        if (rc == ERR_CMD_OR_ARGS_TOO_BIG) { //over buffer size
             printf("error\n");
             continue;
         }
 
         printf(CMD_OK_HEADER, clist.num);
 
-        for (int i = 0; i < clist.num; i++) {
+        for (int i = 0; i < clist.num; i++) { //print output
             printf("<%d> %s", i + 1, clist.commands[i].exe);
             if (strlen(clist.commands[i].args) > 0) {
                 printf(" [%s]", clist.commands[i].args);

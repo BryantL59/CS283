@@ -58,7 +58,7 @@ int build_cmd_list(char *cmd_line, command_list_t *clist)
 
         char *space = strchr(single_cmd, SPACE_CHAR);
 
-        if (space != NULL) {
+        if (space != NULL) { //checks for the first space char
             *space = '\0'; 
             space++;       
 
@@ -70,7 +70,7 @@ int build_cmd_list(char *cmd_line, command_list_t *clist)
         if (strlen(single_cmd) >= EXE_MAX) {
             return ERR_CMD_OR_ARGS_TOO_BIG;
         }
-        strncpy(clist->commands[cmd_count].exe, single_cmd, EXE_MAX - 1);
+        strncpy(clist->commands[cmd_count].exe, single_cmd, EXE_MAX - 1); //copies information about command 
         if (space != NULL && *space != '\0') {
             if (strlen(space) >= ARG_MAX) {
                 return ERR_CMD_OR_ARGS_TOO_BIG;
