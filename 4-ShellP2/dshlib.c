@@ -153,12 +153,11 @@ int exec_local_cmd_loop() {
                     printf("Command not found\n");
                 } else if (errno == EACCES) {
                     printf("Permission denied\n");
-                } else if (errno == ENOTDIR) {
-                    printf("Not a directory\n");
                 } else if (errno == ENOEXEC) {
                     printf("Cannot execute invalid format\n");
-                }
-                else {
+                } else if (errno == ENOTDIR) {
+                    printf("Not a directory\n");
+                } else {
                     printf("Failed to execute fommand\n");
                 }
                 exit(errno); 
