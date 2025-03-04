@@ -129,7 +129,7 @@ int exec_local_cmd_loop() {
             if (cmd.argc == 1) {
                 continue;
             } else if (chdir(cmd.argv[1]) != 0) {
-                printf("cd failed");
+                perror("cd");
                 exit_number = ENOTDIR;
             } else if (cmd.argc > 2){
                 printf("too many arguments");
