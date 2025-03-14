@@ -1,0 +1,4 @@
+socket client mode:  addr:127.0.0.1:8080
+dsh4> 1
+dsh4> 
+cmd loop returned 0

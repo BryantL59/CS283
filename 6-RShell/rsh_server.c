@@ -213,10 +213,11 @@ int process_cli_requests(int svr_socket){
 
         rc = exec_client_requests(cli_socket);
         close(cli_socket);
+        if (rc == OK_EXIT) break;
     }
+    
 
-
-    stop_server(cli_socket);
+    stop_server(svr_socket);
     return rc;
 }
 
@@ -319,9 +320,10 @@ int exec_client_requests(int cli_socket) {
             continue;
         } else if (rsh_match_command(io_buff) == BI_CMD_STOP_SVR) {
             send_message_eof(cli_socket);
+            printf("wtf");
             free(io_buff);
             return OK_EXIT;
-            
+
         }
 
 

@@ -109,17 +109,26 @@ int exec_remote_cmd_loop(char *address, int port)
             break;
         }
 
-        cmd_buff[strcspn(cmd_buff, "\n")] = '\0'; // Remove trailing newline
+        char *trimmed_buff = cmd_buff;
+        while (*trimmed_buff == ' ' || *trimmed_buff == '\t') trimmed_buff++;
 
-        if (strcmp(cmd_buff, EXIT_CMD) == 0) break; // Handle exit before sending
+        trimmed_buff[strcspn(trimmed_buff, "\n")] = '\0'; 
 
-        size_t cmd_len = strlen(cmd_buff);
-        if (cmd_len + 2 >= SH_CMD_MAX) continue; // Prevent buffer overflow
+        if (strcmp(trimmed_buff, EXIT_CMD) == 0) {
+            printf(RCMD_MSG_CLIENT_EXITED);
+            return client_cleanup(cli_socket, trimmed_buff, rsp_buff, OK);
+        } else if (strcmp(trimmed_buff, "stop-server") == 0) {
+            printf(RCMD_MSG_SVR_STOP_REQ);
+            return client_cleanup(cli_socket, trimmed_buff, rsp_buff, OK_EXIT);
+        } 
 
-        cmd_buff[cmd_len] = RDSH_EOF_CHAR;
-        cmd_buff[cmd_len + 1] = '\0';
+        size_t cmd_len = strlen(trimmed_buff);
+        if (cmd_len + 2 >= SH_CMD_MAX) continue; 
 
-        if (send(cli_socket, cmd_buff, cmd_len + 1, 0) < 0) {
+        trimmed_buff[cmd_len] = RDSH_EOF_CHAR;
+        trimmed_buff[cmd_len + 1] = '\0';
+
+        if (send(cli_socket, trimmed_buff, cmd_len + 1, 0) < 0) {
             perror("send");
             return client_cleanup(cli_socket, cmd_buff, rsp_buff, ERR_RDSH_COMMUNICATION);
         }
@@ -141,6 +150,7 @@ int exec_remote_cmd_loop(char *address, int port)
 
     return client_cleanup(cli_socket, cmd_buff, rsp_buff, OK);
 }
+
 
 
 /*
@@ -171,32 +181,31 @@ int start_client(char *server_ip, int port){
     int cli_socket;
     int ret;
 
-    // TODO set up cli_socket
     cli_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (cli_socket == -1) {//check for errors and return
+    if (cli_socket == -1) {
         perror("socket creation failed");
         return ERR_RDSH_CLIENT;
     }
 
-    memset(&addr, 0, sizeof(addr));//0 out
+    memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
 
-    ret = inet_pton(AF_INET, server_ip, &addr.sin_addr);//Convert to binary
-    if (ret <= 0) {//check address
+    ret = inet_pton(AF_INET, server_ip, &addr.sin_addr);
+    if (ret <= 0) {
         perror("Invalid address or address not supported");
         close(cli_socket);
-        return ERR_RDSH_CLIENT;//return for invalid address
+        return ERR_RDSH_CLIENT;
     }
 
     ret = connect(cli_socket, (struct sockaddr *)&addr, sizeof(addr));
-    if (ret < 0) {//check for connection errors
+    if (ret < 0) {
         perror("Connection failed");
         close(cli_socket);
-        return ERR_RDSH_CLIENT;//return for connection error
+        return ERR_RDSH_CLIENT;
     }
 
-    return cli_socket;//no errors
+    return cli_socket;
 }
 
 /*
