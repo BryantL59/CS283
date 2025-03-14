@@ -456,7 +456,7 @@ int rsh_execute_pipeline(int cli_sock, command_list_t *clist) {
             return 1; 
         }
         if (chdir(clist->commands[0].argv[1]) == -1) {
-            perror("cd");
+            dprintf(cli_sock, "cd: %s\n", strerror(errno));
             return 1; 
         }
         return 0; 
